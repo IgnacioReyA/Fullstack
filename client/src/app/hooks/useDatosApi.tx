@@ -1,0 +1,38 @@
+'use client';
+
+import { useEffect, useState } from "react";
+import { Datos } from "../types/datos";
+import { Resultado } from "../types/resultado";
+import axios from "axios";
+
+export const useDatosApi = () => {
+    const [currentDatos, setDatos] = useState<Datos | null>(null)
+    const [error, setError] = useState<string | null>(null)
+    const [loading, setLoading] = useState<boolean>(false)
+
+    const fetchData = async () => {
+        setError(null)
+        setLoading(true)
+        try {
+            const response = await axios.get<Resultado>('https://localuser:3000/operacion');
+            const data = response.data.resultado[0]
+            const datos: Datos = {
+                num1: data.num1,
+                operador: data.operador,
+                num2: data.num2
+            }
+            setDatos(datos)
+
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'An error occurred');
+        } finally{
+            setLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        fetchData()
+    }, [])
+    
+    return {currentDatos, loading, error, fetchData}
+}
